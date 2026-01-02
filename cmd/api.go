@@ -5,9 +5,11 @@ import (
 	"net/http"
 	"time"
 
+	repo "github.com/firdanbash/ecom/internal/adapters/postgresql/sqlc"
 	"github.com/firdanbash/ecom/internal/products"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/jackc/pgx/v5"
 )
 
 func (app *application) mount() http.Handler {
@@ -28,7 +30,7 @@ func (app *application) mount() http.Handler {
 		w.Write([]byte("all good"))
 	})
 
-	productService := products.NewService()
+	productService := products.NewService(repo.New(app.db))
 	productHandler := products.NewHandler(productService)
 	r.Get("/products", productHandler.ListProducts)
 	return r
@@ -49,6 +51,7 @@ func (app *application) run(h http.Handler) error {
 
 type application struct {
 	config config
+	db     *pgx.Conn
 }
 
 type config struct {
@@ -57,5 +60,5 @@ type config struct {
 }
 
 type dbConfig struct {
-	// dsn string
+	dsn string
 }
