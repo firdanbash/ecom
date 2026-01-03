@@ -27,7 +27,10 @@ func (app *application) mount() http.Handler {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("all good"))
+		_, err := w.Write([]byte("all good"))
+		if err != nil {
+			return
+		}
 	})
 
 	productService := products.NewService(repo.New(app.db))
