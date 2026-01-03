@@ -39,7 +39,9 @@ func (s *svc) PlaceOrder(ctx context.Context, tempOrder createOrderParams) (repo
 	if err != nil {
 		return repo.Order{}, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 	qtx := s.repo.WithTx(tx)
 
 	// create an order
@@ -71,6 +73,8 @@ func (s *svc) PlaceOrder(ctx context.Context, tempOrder createOrderParams) (repo
 		}
 	}
 
-	tx.Commit(ctx)
+	defer func() {
+		_ = tx.Commit(ctx)
+	}()
 	return order, nil
 }
